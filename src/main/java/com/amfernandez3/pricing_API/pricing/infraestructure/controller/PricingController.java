@@ -1,13 +1,15 @@
+// En infraestructura (PricingController.java)
 package com.amfernandez3.pricing_API.pricing.infraestructure.controller;
 
 import com.amfernandez3.pricing_API.pricing.application.dto.PriceResponse;
 import com.amfernandez3.pricing_API.pricing.application.query.PriceQueryService;
+import com.amfernandez3.pricing_API.pricing.domain.exception.PriceNotFoundException;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/prices")
@@ -22,13 +24,12 @@ public class PricingController {
 
     @GetMapping
     public ResponseEntity<PriceResponse> getPrice(
-            @RequestParam LocalDateTime date,
-            @RequestParam int productId,
-            @RequestParam int brandId) {
+            @RequestParam @NotNull LocalDateTime date,
+            @RequestParam @NotNull int productId,
+            @RequestParam @NotNull int brandId) {
         logger.info("Received request to get price with productId: {}, brandId: {}, at date: {}", productId, brandId, date);
-        Optional<PriceResponse> priceResponse = priceQueryService.getPrice(date, productId, brandId);
-        return priceResponse
+        return priceQueryService.getPrice(date, productId, brandId)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new PriceNotFoundException("Price not found"));
     }
 }
