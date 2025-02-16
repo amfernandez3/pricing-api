@@ -1,4 +1,3 @@
-// En el servicio (PriceQueryServiceImpl.java)
 package com.amfernandez3.pricing_API.pricing.application.query.implementation;
 
 import com.amfernandez3.pricing_API.pricing.application.dto.PriceResponse;
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class PriceQueryServiceImpl implements PriceQueryService {
@@ -21,9 +20,10 @@ public class PriceQueryServiceImpl implements PriceQueryService {
     }
 
     @Override
-    public List<PriceResponse> getPrices(LocalDateTime date, int productId, int brandId) {
+    public Optional<PriceResponse> getPrice(LocalDateTime date, int productId, int brandId) {
         List<Price> prices = priceRepository.findPrices(date, productId, brandId);
         return prices.stream()
+                .findFirst() // Selecciona el precio con mayor prioridad
                 .map(price -> new PriceResponse(
                         price.getProductId(),
                         price.getBrandId(),
@@ -31,7 +31,6 @@ public class PriceQueryServiceImpl implements PriceQueryService {
                         price.getStartDate(),
                         price.getEndDate(),
                         BigDecimal.valueOf(price.getPrice()),
-                        price.getCurrency()))
-                .collect(Collectors.toList());
+                        price.getCurrency()));
     }
 }

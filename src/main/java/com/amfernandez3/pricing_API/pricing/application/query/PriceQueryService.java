@@ -5,7 +5,8 @@ import com.amfernandez3.pricing_API.pricing.domain.model.Price;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface PriceQueryService {
-    List<PriceResponse> getPrices(LocalDateTime date, int productId, int brandId);
+    Optional<PriceResponse> getPrice(LocalDateTime date, int productId, int brandId);
 }

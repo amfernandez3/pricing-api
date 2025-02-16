@@ -13,18 +13,18 @@ import java.util.stream.Collectors;
 public class PriceJpaRepository implements PriceRepository {
     private final SpringDataPriceRepository springDataPriceRepository;
 
+
     public PriceJpaRepository(SpringDataPriceRepository springDataPriceRepository) {
         this.springDataPriceRepository = springDataPriceRepository;
     }
 
     @Override
-    public List<Price> findPrices(LocalDateTime dateTime, int productId, int brandId) {
-
-        List<PriceEntity> entities = springDataPriceRepository.findAll();
-
+    public List<Price> findPrices(LocalDateTime date, int productId, int brandId) {
+        List<PriceEntity> entities = springDataPriceRepository //TODO: valorar el uso de una query al terminar funcionalidadad base
+                .findByBrandIdAndProductIdAndStartDateLessThanEqualAndEndDateGreaterThanEqualOrderByPriorityDesc(
+                        brandId, productId, date, date);
         return entities.stream()
                 .map(PriceEntity::toDomain)
                 .collect(Collectors.toList());
     }
-
 }
