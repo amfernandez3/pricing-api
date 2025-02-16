@@ -1,0 +1,1 @@
+Pricing API is a microservice built with Spring Boot that handles product pricing based on brand, date, and priority. It processes pricing queries and applies business rules to determine the correct price for a given request.
