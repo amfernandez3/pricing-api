@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/prices")
 public class PricingController {
     private static final Logger logger = LoggerFactory.getLogger(PricingController.class);
 
@@ -23,13 +22,11 @@ public class PricingController {
         this.priceQueryService = priceQueryService;
     }
 
-    @GetMapping
+    @RequestMapping(value = "/prices", method = RequestMethod.GET)
     public ResponseEntity<List<PriceResponse>> getPrices(@RequestParam LocalDateTime date, @RequestParam int productId, @RequestParam int brandId) {
         logger.info("Received request to get prices with informed productId: {}, brandId: {}, at date: {}", productId, brandId, date);
-        // Recupera la lista de precios desde el QueryService
         List<PriceResponse> priceResponses = priceQueryService.getPrices(date, productId, brandId);
 
-        // Devuelve la lista de precios como respuesta
         return ResponseEntity.ok(priceResponses);
     }
 }
