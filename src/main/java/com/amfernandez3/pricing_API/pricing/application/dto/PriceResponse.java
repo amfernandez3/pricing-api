@@ -13,7 +13,6 @@ public class PriceResponse {
     private BigDecimal price;
     private String currency;
 
-    // Constructor
     public PriceResponse(int productId, int brandId, int priceList, LocalDateTime startDate, LocalDateTime endDate, BigDecimal price, String currency) {
         this.productId = productId;
         this.brandId = brandId;
@@ -24,7 +23,6 @@ public class PriceResponse {
         this.currency = currency;
     }
 
-    // Getters and Setters
     public int getProductId() {
         return productId;
     }

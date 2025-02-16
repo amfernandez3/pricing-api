@@ -1,9 +1,8 @@
-// En infraestructura (PricingController.java)
 package com.amfernandez3.pricing_API.pricing.infraestructure.controller;
 
 import com.amfernandez3.pricing_API.pricing.application.dto.PriceResponse;
 import com.amfernandez3.pricing_API.pricing.application.query.PriceQueryService;
-import com.amfernandez3.pricing_API.pricing.domain.exception.PriceNotFoundException;
+import com.amfernandez3.pricing_API.pricing.infraestructure.exception.PriceNotFoundException;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

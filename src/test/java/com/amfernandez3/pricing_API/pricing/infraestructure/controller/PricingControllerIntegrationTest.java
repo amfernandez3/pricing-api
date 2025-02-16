@@ -1,80 +1,55 @@
-
 package com.amfernandez3.pricing_API.pricing.infraestructure.controller;
 
-import com.amfernandez3.pricing_API.pricing.application.dto.PriceResponse;
-import com.amfernandez3.pricing_API.pricing.application.query.PriceQueryService;
-import org.junit.jupiter.api.Test;
+import com.amfernandez3.pricing_API.pricing.infraestructure.entity.PriceEntity;
+import com.amfernandez3.pricing_API.pricing.infraestructure.jpaRepository.SpringDataPriceRepository;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Propagation;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Optional;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@WebMvcTest(PricingController.class)
-public class PricingControllerTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class PricingControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
-    private PriceQueryService priceQueryService;
+    @Autowired
+    private SpringDataPriceRepository priceRepository;
 
-    @Test
-    public void testGetPrice() throws Exception {
-        LocalDateTime date = LocalDateTime.parse("2020-06-14T10:00:00");
-        int productId = 35455;
-        int brandId = 1;
+    @BeforeEach
+    public void setUp() {
+        priceRepository.deleteAll();
 
-        PriceResponse priceResponse = new PriceResponse(
-                productId, brandId, 1, date, date.plusDays(1), BigDecimal.valueOf(35.50), "EUR");
-
-        when(priceQueryService.getPrice(date, productId, brandId))
-                .thenReturn(Optional.of(priceResponse));
-
-        mockMvc.perform(get("/prices")
-                        .param("date", date.toString())
-                        .param("productId", String.valueOf(productId))
-                        .param("brandId", String.valueOf(brandId)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productId").value(productId))
-                .andExpect(jsonPath("$.brandId").value(brandId))
-                .andExpect(jsonPath("$.price").value(35.50));
+        priceRepository.save(new PriceEntity(1L, 1, LocalDateTime.parse("2020-06-14T00:00:00"),
+                LocalDateTime.parse("2020-12-31T23:59:59"), 1, 35455, 0, BigDecimal.valueOf(35.50), "EUR"));
+        priceRepository.save(new PriceEntity(2L, 1, LocalDateTime.parse("2020-06-14T15:00:00"),
+                LocalDateTime.parse("2020-06-14T18:30:00"), 2, 35455, 1, BigDecimal.valueOf(25.45), "EUR"));
+        priceRepository.save(new PriceEntity(3L, 1, LocalDateTime.parse("2020-06-15T00:00:00"),
+                LocalDateTime.parse("2020-06-15T11:00:00"), 3, 35455, 1, BigDecimal.valueOf(30.50), "EUR"));
+        priceRepository.save(new PriceEntity(4L, 1, LocalDateTime.parse("2020-06-15T16:00:00"),
+                LocalDateTime.parse("2020-12-31T23:59:59"), 4, 35455, 1, BigDecimal.valueOf(38.95), "EUR"));
     }
 
-    @Test
-    public void testGetPriceNotFound() throws Exception {
-        LocalDateTime date = LocalDateTime.parse("2020-06-14T10:00:00");
-        int productId = 35455;
-        int brandId = 1;
-
-        when(priceQueryService.getPrice(date, productId, brandId))
-                .thenReturn(Optional.empty());
-
-        mockMvc.perform(get("/prices")
-                        .param("date", date.toString())
-                        .param("productId", String.valueOf(productId))
-                        .param("brandId", String.valueOf(brandId)))
-                .andExpect(status().isNotFound());
-    }
-
-    //tests solicitados en el enunciado para diferentes casuísticas de entrada:
-
+    @Order(1)
+    @Transactional
     @Test
     public void testGetPriceAt10AMOnDay14() throws Exception {
         // Datos de prueba
         LocalDateTime date = LocalDateTime.parse("2020-06-14T10:00:00");
         int productId = 35455;
         int brandId = 1;
-
-        PriceResponse priceResponse = new PriceResponse(
-                productId, brandId, 1, date, LocalDateTime.parse("2020-12-31T23:59:59"), BigDecimal.valueOf(35.50), "EUR");
-
-        when(priceQueryService.getPrice(date, productId, brandId))
-                .thenReturn(Optional.of(priceResponse));
 
         // Ejecutar la solicitud y verificar la respuesta
         mockMvc.perform(get("/prices")
@@ -89,18 +64,14 @@ public class PricingControllerTest {
                 .andExpect(jsonPath("$.currency").value("EUR"));
     }
 
+    @Order(2)
+    @Transactional
     @Test
     public void testGetPriceAt4PMOnDay14() throws Exception {
         // Datos de prueba
         LocalDateTime date = LocalDateTime.parse("2020-06-14T16:00:00");
         int productId = 35455;
         int brandId = 1;
-
-        PriceResponse priceResponse = new PriceResponse(
-                productId, brandId, 2, date, LocalDateTime.parse("2020-06-14T18:30:00"), BigDecimal.valueOf(25.45), "EUR");
-
-        when(priceQueryService.getPrice(date, productId, brandId))
-                .thenReturn(Optional.of(priceResponse));
 
         // Ejecutar la solicitud y verificar la respuesta
         mockMvc.perform(get("/prices")
@@ -115,15 +86,14 @@ public class PricingControllerTest {
                 .andExpect(jsonPath("$.currency").value("EUR"));
     }
 
+    @Order(3)
+    @Transactional
     @Test
     public void testGetPriceAt9PMOnDay14() throws Exception {
         // Datos de prueba
         LocalDateTime date = LocalDateTime.parse("2020-06-14T21:00:00");
         int productId = 35455;
         int brandId = 1;
-
-        when(priceQueryService.getPrice(date, productId, brandId))
-                .thenReturn(Optional.empty());
 
         // Ejecutar la solicitud y verificar la respuesta
         mockMvc.perform(get("/prices")
@@ -133,18 +103,14 @@ public class PricingControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Order(4)
+    @Transactional
     @Test
     public void testGetPriceAt10AMOnDay15() throws Exception {
         // Datos de prueba
         LocalDateTime date = LocalDateTime.parse("2020-06-15T10:00:00");
         int productId = 35455;
         int brandId = 1;
-
-        PriceResponse priceResponse = new PriceResponse(
-                productId, brandId, 3, date, LocalDateTime.parse("2020-06-15T11:00:00"), BigDecimal.valueOf(30.50), "EUR");
-
-        when(priceQueryService.getPrice(date, productId, brandId))
-                .thenReturn(Optional.of(priceResponse));
 
         // Ejecutar la solicitud y verificar la respuesta
         mockMvc.perform(get("/prices")
@@ -159,15 +125,14 @@ public class PricingControllerTest {
                 .andExpect(jsonPath("$.currency").value("EUR"));
     }
 
+    @Order(5)
+    @Transactional
     @Test
     public void testGetPriceAt9PMOnDay16() throws Exception {
         // Datos de prueba
         LocalDateTime date = LocalDateTime.parse("2020-06-16T21:00:00");
         int productId = 35455;
         int brandId = 1;
-
-        when(priceQueryService.getPrice(date, productId, brandId))
-                .thenReturn(Optional.empty());
 
         // Ejecutar la solicitud y verificar la respuesta
         mockMvc.perform(get("/prices")

@@ -36,7 +36,22 @@ public class PriceEntity {
     @Column(name = "currency", nullable = false, length = 10)
     private String currency;
 
-    // Getters y setters
+    public PriceEntity() {
+
+    }
+
+    public PriceEntity(Long id, int brandId, LocalDateTime startDate, LocalDateTime endDate,
+                       int priceList, int productId, int priority, BigDecimal price, String currency) {
+        this.id = id;
+        this.brandId = brandId;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.priceList = priceList;
+        this.productId = productId;
+        this.priority = priority;
+        this.price = price;
+        this.currency = currency;
+    }
     public Long getId() {
         return id;
     }
@@ -109,7 +124,6 @@ public class PriceEntity {
         this.currency = currency;
     }
 
-    // Método para convertir PriceEntity en Price (modelo de dominio)
     public Price toDomain() {
         return new Price(
                 this.id,

@@ -5,7 +5,6 @@ import com.amfernandez3.pricing_API.pricing.application.query.PriceQueryService;
 import com.amfernandez3.pricing_API.pricing.domain.model.Price;
 import com.amfernandez3.pricing_API.pricing.domain.repository.PriceRepository;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
